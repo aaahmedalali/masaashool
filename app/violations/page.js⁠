@@ -1,0 +1,52 @@
+'use client';
+import { useEffect, useState } from 'react';
+
+export default function ViolationsList() {
+  const [violations, setViolations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchViolations() {
+      try {
+        const res = await fetch('/api/violations');
+        const data = await res.json();
+        if (data.success) setViolations(data.data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchViolations();
+  }, []);
+
+  return (
+    <div style={{ maxWidth: '800px', margin: '20px auto', padding: '20px', direction: 'rtl', fontFamily: 'sans-serif' }}>
+      <h2>سجل المخالفات السلوكية</h2>
+      {loading ? <p>جاري التحميل...</p> : (
+        <table border="1" cellPadding="10" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+          <thead>
+            <tr style={{ background: '#f1f5f9' }}>
+              <th>اسم الطالب</th>
+              <th>الصف/الفصل</th>
+              <th>المخالفة</th>
+              <th>الدرجة</th>
+              <th>الإجراء المتخذ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {violations.map((v, i) => (
+              <tr key={i}>
+                <td>{v.student_name}</td>
+                <td>{v.grade_level} / {v.class_room}</td>
+                <td>{v.violation_type}</td>
+                <td>{v.degree}</td>
+                <td>{v.action_taken}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
