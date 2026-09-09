@@ -1,0 +1,31 @@
+import { neon } from '@neondatabase/serverless';
+
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const { 
+      student_id, 
+      student_name, 
+      grade_level, 
+      class_room, 
+      violation_type, 
+      degree, 
+      action_taken, 
+      parent_notified 
+    } = body;
+
+    const sql = neon(process.env.POSTGRES_URL);
+
+    await sql`
+      INSERT INTO behavioral_violations 
+      (student_id, student_name, grade_level, class_room, violation_type, degree, action_taken, parent_notified)
+      VALUES 
+      (${student_id}, ${student_name}, ${grade_level}, ${class_room}, ${violation_type}, ${degree || 1}, ${action_taken}, ${parent_notified || false})
+    `;
+
+    return Response.json({ success: true, message: 'تم تسجيل المخالفة بنجاح' });
+  } catch (error) {
+    console.error('Error saving violation:', error);
+    return Response.json({ success: false, error: 'فشل في تسجيل المخالفة' }, { status: 500 });
+  }
+}
